@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>省市联动</title>
+		<script type="text/javascript" src="jquery-1.9.0.min.js" ></script>
+		<script src="provincecity.js"></script>
+		<style>
+			input{
+				height: 30px;
+				width: 150px;
+				border-radius: 10px;
+				line-height: 30px;
+				font-size: 12pt;
+			}
+			.childrenBox{
+				height: 100%;
+				width: 400px;
+				border: 1px solid blue;
+				display: none;
+			}
+			.boxHeadType{
+				height: 30px;
+				/*border: 1px solid red;*/
+			}
+			.boxHeadType div{
+			    /*background-color: #FFF;*/
+			    width: 100px;
+			    float: left;
+			    border: 1px solid #eee;
+    				border-radius: 4px 4px 0 0;
+    				text-align: center;
+    				color: #337ab7;
+    				padding: 5px;
+			}
+			.provinceChildren{
+				display: block;
+			}
+			.cityChildren{
+				display: none;
+			}
+			.countyChildren{
+				display: none;
+			}
+			.typeChildren li{
+				
+			}
+			ul{
+				/*border: 1px solid red;*/
+				width: 100%;
+				padding: 0;
+				margin: 0;
+				float: left;
+			}
+			li{
+				float: left;
+				list-style: none;
+				color: #337ab7;
+				padding: 5px;
+				border: 1px solid blue;
+			}
+			li:hover{
+				background-color: #c9302c;
+				color: #FFF;
+			}
+			.selectedli{
+				background-color: #c9302c;
+				color: #FFF;
+			}
+			.footer button{
+				height: 30px;
+				padding: 5px;
+				width: 100px;
+				border-radius: 5px;
+				background-color: #c9302c;
+				color: white;
+				font-size: 12pt;
+			}
+			#InputSelect{
+				width: 200px;
+			}
+			
+		</style>
+	</head>
+	<body>
+		
+		<input id="InputSelect" placeholder="请选择地区" />
+		<div class="childrenBox">
+			<div class="boxHeadType ">
+				<div>省份</div>
+				<div style="display: none;">城市</div>
+				<div style="display: none;">区县</div>
+			</div>
+			<div class="childrenParent">
+				<ul class="provinceChildren">
+					<!--<li>全国</li><li>全国</li><li>全国</li><li>全国</li><li>全国</li>
+					<li>全国</li><li>全国</li><li>全国</li><li>全国</li><li>全国</li>
+					<li>全国</li><li>全国</li><li>全国</li><li>全国</li><li>全国</li>
+					<li>全国</li><li>全国</li><li>全国</li><li>全国</li><li>全国</li>
+					<li>全国</li><li>全国</li><li>全国</li><li>全国</li><li>全国</li>-->
+				</ul>
+				<ul class="cityChildren">
+					<!--<li>城市</li><li>城市</li><li>城市</li><li>城市</li><li>城市</li>
+					<li>城市</li><li>城市</li><li>城市</li><li>城市</li><li>城市</li>
+					<li>城市</li><li>城市</li><li>城市</li><li>城市</li><li>城市</li>
+					<li>城市</li><li>城市</li><li>城市</li><li>城市</li><li>城市</li>-->
+				</ul>
+				<ul class="countyChildren">
+					<!--<li>县区</li><li>县区</li><li>县区</li><li>县区</li><li>县区</li>
+					<li>县区</li><li>县区</li><li>县区</li><li>县区</li><li>县区</li>-->
+				</ul>
+			</div>
+			
+			<div class="footer">
+				<button>清除</button>
+			</div>
+		</div>
+		
+		
+		
+		<!--<ul>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+			<li>abc</li>
+		</ul>-->
+	</body>
+	
+	
+	<script>
+	
+		var provinceArr = ['全国','北京','天津','河北','山西','内蒙古','辽宁','吉林','黑龙江','上海','江苏','浙江'];
+		
+		
+		var inputSelect = document.getElementById('InputSelect');
+		inputSelect.addEventListener('focus',function(){
+			console.log('获得焦点');
+			$('.childrenBox').css('display','block');
+			$('.boxHeadType div:eq(0)').css('display','block').siblings().css('display','block');
+			//1.每次获得焦点都需要重置选项
+			new initTypeTouch().showSelectedAndHideOthers(0);
+		});
+		//记录鼠标是否移除大框框
+		var isMouseMoveOut = false;
+		var inputMouseMoveOut = false;
+		$('.childrenBox').mouseout(function(){
+			isMouseMoveOut = true;
+		}).mouseover(function(){
+			isMouseMoveOut = false;
+		});
+		$('#InputSelect').mouseout(function(){
+			inputMouseMoveOut = true;
+		}).mouseover(function(){
+			inputMouseMoveOut = false;
+		});
+		$(window).click(function(){
+			console.log('fjdkslfjlasjf');
+			if(isMouseMoveOut ==true && inputMouseMoveOut == true){
+				$('.childrenBox').css('display','none');
+			}
+		})
+		
+		
+		
+		initTypeTouch();
+		loadProvince(provinceArr,$('.provinceChildren'));
+//		初始化省市县点击
+		 function initTypeTouch(){
+			this.getTouchIndex = function(){
+				var _this = this;
+				$('.boxHeadType div').click(function(e){
+					var selectedIndex = $(this).index();
+					_this.showSelectedAndHideOthers(selectedIndex);
+				})
+			}
+			this.showSelectedAndHideOthers = function(selectedIndex){
+				var ulArr = $('.childrenParent ul');
+				$(ulArr[selectedIndex]).css('display','block').siblings().css('display','none');
+			}
+			this.getTouchIndex();
+		}
+		//load province
+		function loadProvince(provinces,target){
+			this.inputShowStr = '';
+			this.inputTarget = $('#InputSelect');
+			this.provinceStr = '';
+			this.cityStr = '';
+			
+			
+			
+			this.loadProvinceStr = function(){//加载各省数据
+				target.empty();
+				$.each(cityJson, function(i,val) {
+					if (val.item_code.substr(2, 4) == '0000') {
+						target.append('<li code="'+val.item_code+'">'+val.item_name+'</li>');
+					}
+				});
+			}
+			this.ProvinceTouch = function(){//各省的点击事件
+				var _this = this;
+				$(target).children('li').click(function(e){//点击省后显示市
+					console.log('province item touch');
+					
+					//获取点击的值,赋值输入框进行展示
+					var showName = this.textContent;
+					_this.provinceStr = showName;
+					$('#InputSelect').val(showName);
+					//1.显示市标签
+					$('.boxHeadType div:eq(1)').css('display','block');
+					//1.1.1  改变样式
+					$(this).addClass('selectedli').siblings().removeClass('selectedli');
+					
+					//1.2  在显示城市之前 加载对应省份的城市列表
+					var code = $(this).attr('code');
+					console.log(code);
+					$('.cityChildren').empty();
+					$.each(cityJson, function(i,val) {
+						var cityPre = code.substring(0,2);
+						if (val.item_code.substr(0, 2) == cityPre && val.item_code.substr(2, 4) != '0000' && val.item_code.substr(4, 2) == '00') {
+							$('.cityChildren').append('<li code="'+val.item_code+'">'+val.item_name+'</li>');
+						}
+					});
+					//2.然后直接进行显示城市,隐藏省份,直接调用现有方法
+					new initTypeTouch().showSelectedAndHideOthers(1);
+					//调用市区点击事件
+					_this.cityTouch();
+				})
+			}
+			this.cityTouch = function(){//各市的点击事件
+				var _this = this;
+				$('.cityChildren').children('li').click(function(){
+					
+					//获取点击的值,赋值输入框进行展示
+					var showName = this.textContent;
+					_this.cityStr = showName;
+					$('#InputSelect').val(_this.provinceStr+'/'+showName);
+					
+					//1.显示区标签
+					$('.boxHeadType div:eq(2)').css('display','block');
+					//1.1.1  改变样式
+					$(this).addClass('selectedli').siblings().removeClass('selectedli');
+					
+					var cityVal = $(this).attr('code');
+					$('.countyChildren').empty();
+					$.each(cityJson, function(i,val) {
+						 if (cityVal == '110100' || cityVal == "120100" || cityVal == "310100" || cityVal == "500100") {
+						        if (val.item_code.substr(0, 3) == cityVal.substr(0, 3) && val.item_code.substr(4, 2) != '00') {
+						          $('.countyChildren').append('<li code="'+val.item_code+'">'+val.item_name+'</li>');
+						        }
+						      } else {
+						        if (val.item_code.substr(0, 4) == cityVal.substr(0, 4) && val.item_code.substr(4, 2) != '00') {
+						          $('.countyChildren').append('<li code="'+val.item_code+'">'+val.item_name+'</li>');
+						        }
+						      }
+					});
+					//2.然后直接进行显示城市,隐藏省份,直接调用现有方法
+					new initTypeTouch().showSelectedAndHideOthers(2);
+					_this.countyTouch();
+				});
+			}
+			this.countyTouch = function(){//区县点击事件
+				var _this = this;
+				$('.countyChildren li').click(function(e){
+					//获取点击的值,赋值输入框进行展示
+					var showName = this.textContent;
+					$('#InputSelect').val(_this.provinceStr+'/'+_this.cityStr+'/'+showName);
+					//1.1.1  改变样式
+					$(this).addClass('selectedli').siblings().removeClass('selectedli');
+					//点击完成后隐藏输入框
+					_this.clearSelect();
+				});
+			}
+			this.clearSelect = function(){//置空选择项
+				$('.provinceChildren li').each(function(e){
+					$(this).removeClass('selectedli');
+				})
+				//清空市,县区
+				$('.cityChildren').empty();
+				$('.countyChildren').empty();
+				$('.childrenBox').css('display','none');
+			}
+			this.loadProvinceStr();
+			this.ProvinceTouch();
+		}
+		
+		$('.footer button').click((function(e){
+			//关闭框后进行数据重置,  1.隐藏城市,区县,  2.改变省份选种样式
+			// do sth
+			$('#InputSelect').val('');
+			new loadProvince(provinceArr,$('.provinceChildren')).clearSelect();
+		}));
+		
+		
+	</script>
+</html>
